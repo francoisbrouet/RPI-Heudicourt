@@ -5,9 +5,7 @@
 </head>
 <body>
     <h1>Power Consumption</h1>
-    <img src="solaire_graph?<?php echo time(); ?>" alt="Solaire graph">
+    <img src="solaire_graph.png?<?php echo time(); ?>" alt="Shelly Power Graph">
 </body>
 </html>
-
-?<?php echo time(); ?>
 
