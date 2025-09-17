@@ -4,9 +4,10 @@ import sqlite3
 import datetime
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+from tabulate import tabulate
 
 
-def plot_logdata(db_file, png_file):
+def read_database(db_file):
 
         # Database
         conn = sqlite3.connect (db_file)
@@ -29,6 +30,13 @@ def plot_logdata(db_file, png_file):
         c.execute(sql)
         rows = c.fetchall()
         conn.close()
+
+        return rows
+
+
+def plot_logdata(db_file, png_file):
+
+        rows = read_database(db_file)
 
         # Reduction : keep every 4th point
         idx = range(0, len(rows), 4)
@@ -63,12 +71,11 @@ def plot_logdata(db_file, png_file):
         plt.gcf().autofmt_xdate()
         fig.savefig(png_file)
 
-        # Table
-        tabl = rows
-        tabl.insert(0, ('Heure', 'Conso.', 'Prod.', 'Relais'))
-        for r in tabl[:20]:
-                print ('{:<30} {:<10} {:<10} {:<10}'.format(*r))
 
-
+def display_logdata(db_file):
+        
+        rows = read_database(db_file)
+        print(tabulate(rows[:20], headers=["Date / Heure", "Conso.", "Prod.", "Relais"], tablefmt="psql"))
+        
 
 
