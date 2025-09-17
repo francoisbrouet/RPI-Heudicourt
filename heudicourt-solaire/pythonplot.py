@@ -8,6 +8,7 @@ import matplotlib.dates as mdates
 
 def plot_logdata(db_file, png_file):
 
+        # Database
         conn = sqlite3.connect (db_file)
         c = conn.cursor()
 
@@ -29,16 +30,17 @@ def plot_logdata(db_file, png_file):
         rows = c.fetchall()
         conn.close()
 
-        print (len(rows), 'records')
+        # Reduction : keep every 4th point
+        idx = range(0, len(rows), 4)
+        rows_red = [rows[i] for i in idx]
 
-        time = [datetime.datetime.fromisoformat(r[0]) for r in rows]
-        power_0 = [r[1] for r in rows]
-        power_1 = [-r[2] for r in rows]
-        relay_state = [r[3] for r in rows]
+        time = [datetime.datetime.fromisoformat(r[0]) for r in rows_red]
+        power_0 = [r[1] for r in rows_red]
+        power_1 = [-r[2] for r in rows_red]
+        relay_state = [r[3] for r in rows_red]
 
+        # Graphics
         fig, ax1 = plt.subplots(figsize=(10, 4))
-        #fig = plt.figure(figsize=(10, 4))
-
         ax2 = ax1.twinx()
 
         ax1.plot(time, power_0, label='Consommation', color='b')
@@ -61,6 +63,11 @@ def plot_logdata(db_file, png_file):
         plt.gcf().autofmt_xdate()
         fig.savefig(png_file)
 
+        # Table
+        tabl = rows
+        tabl.insert(0, ('Heure', 'Conso.', 'Prod.', 'Relais'))
+        for r in tabl[:20]:
+                print ('{:<30} {:<10} {:<10} {:<10}'.format(*r))
 
 
 
