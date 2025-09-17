@@ -13,7 +13,9 @@
 <?php
 echo exec ('chmod 0775 logdata.db');
 echo exec ('rm solaire_graph.png -rf');
-echo exec ('./webserver_plot.sh');
+echo "<pre>";
+passthru ('python3 webserver_plot.py 2>&1');
+echo "</pre>";
 echo exec ('chmod 0775 solaire_graph.png');
 ?>
 

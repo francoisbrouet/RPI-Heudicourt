@@ -75,7 +75,7 @@ def plot_logdata(db_file, png_file):
 def display_logdata(db_file):
         
         rows = read_database(db_file)
-        print(tabulate(rows[:20], headers=["Date / Heure", "Conso.", "Prod.", "Relais"], tablefmt="psql"))
+        print(tabulate(rows[-20:], headers=["Date / Heure", "Conso.", "Prod.", "Relais"], tablefmt="psql"))
         
 
 
