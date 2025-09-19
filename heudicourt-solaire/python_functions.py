@@ -10,7 +10,7 @@ import sqlite3
 import time
 
 
-def write_database(db_file, ip_shelly, polling_interval=60):
+def write_database(db_file, ip_shelly, polling_interval='60'):
         try:
               
                 while True:
@@ -85,7 +85,7 @@ def write_database(db_file, ip_shelly, polling_interval=60):
                                 conn.commit()                
                                 conn.close()
 
-                                time.sleep(polling_interval)
+                                time.sleep(int(polling_interval))
 
                         except requests.exceptions.RequestException as e:
                                 print ('Shelly unreachable:', e)
