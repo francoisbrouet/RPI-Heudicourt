@@ -1,3 +1,2 @@
-database/logdata.db
-heudicourt-solaire/__py_cache__
-
+database/*
+heudicourt-solaire/__py_cache__/*
