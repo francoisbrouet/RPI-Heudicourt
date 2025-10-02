@@ -126,7 +126,7 @@ def read_database(db_file):
 
 def plot_logdata(db_file, png_file):
 
-        matplotlib.use('Agg')   # use file backend, no GUI
+        plt.use('Agg')   # use file backend, no GUI
         rows = read_database(db_file)
 
         # Reduction : keep every 4th point
