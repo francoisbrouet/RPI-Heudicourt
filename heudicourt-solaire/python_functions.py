@@ -126,7 +126,6 @@ def read_database(db_file):
 
 def plot_logdata(db_file, png_file):
 
-        plt.use('Agg')   # use file backend, no GUI
         rows = read_database(db_file)
 
         # Reduction : keep every 4th point
@@ -155,7 +154,7 @@ def plot_logdata(db_file, png_file):
 
         ax1.grid(True)
 
-        fig.legend(loc='upper right')
+        fig.legend(loc='upper left')
         fig.tight_layout()
 
         fig.gca().xaxis.set_major_formatter(mdates.DateFormatter('%b-%d %H:%M'))
@@ -165,4 +164,5 @@ def plot_logdata(db_file, png_file):
 
 def display_logdata(db_file):
         rows = read_database(db_file)
-        print(tabulate(rows[-20:], headers=["Date / Heure", "Conso.", "Prod.", "Relais"], tablefmt="psql"))
+        rows1 = rows[-50:]
+        print(tabulate(rows1[::-1], headers=["Date / Heure", "Conso.", "Prod.", "Relais"], tablefmt="psql"))
