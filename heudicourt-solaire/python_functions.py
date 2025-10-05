@@ -43,7 +43,8 @@ def write_database(db_file, ip_shelly, polling_interval='60'):
                                 print('Power consumption:', power_cons, 'W')
                                 print('Power production:', power_prod, 'W')
 
-                                conn = sqlite3.connect(db_file)
+                                conn = sqlite3.connect(db_file, timeout=60)
+                                conn.execute("PRAGMA journal_mode=WAL;")
                                 c = conn.cursor()
 
                                 for device in [0, 1]:
@@ -163,6 +164,11 @@ def plot_logdata(db_file, png_file):
 
 
 def display_logdata(db_file):
+
         rows = read_database(db_file)
-        rows1 = rows[-50:]
+
+        # 60 last lines (1 hour)
+        rows1 = rows[-60:]
+
         print(tabulate(rows1[::-1], headers=["Date / Heure", "Conso.", "Prod.", "Relais"], tablefmt="psql"))
+
