@@ -167,8 +167,8 @@ def display_logdata(db_file):
 
         rows = read_database(db_file)
 
-        # 60 last lines (1 hour)
-        rows1 = rows[-60:]
+        # 360 last lines (6 hours)
+        rows1 = rows[-360:]
 
         print(tabulate(rows1[::-1], headers=["Date / Heure", "Conso.", "Prod.", "Relais"], tablefmt="psql"))
 
