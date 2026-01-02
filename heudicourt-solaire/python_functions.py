@@ -9,8 +9,20 @@ import requests
 import sqlite3
 import time
 
+import re
+import subprocess
 
-def write_database(db_file, ip_shelly, polling_interval='60'):
+
+def read_temperatures ():
+
+        lst_temp = []
+
+
+        return lst_temp
+
+
+ 
+def write_database (db_file, ip_shelly, polling_interval='60'):
         try:
                 while True:
 
@@ -99,7 +111,7 @@ def write_database(db_file, ip_shelly, polling_interval='60'):
 
 
 
-def read_database(db_file):
+def read_database (db_file):
 
         # Database
         conn = sqlite3.connect (db_file)
@@ -125,7 +137,7 @@ def read_database(db_file):
         return rows
 
 
-def plot_logdata(db_file, png_file):
+def plot_logdata (db_file, png_file):
 
         rows = read_database(db_file)
 
@@ -163,7 +175,7 @@ def plot_logdata(db_file, png_file):
         fig.savefig(png_file)
 
 
-def display_logdata(db_file):
+def display_logdata (db_file):
 
         rows = read_database(db_file)
 
