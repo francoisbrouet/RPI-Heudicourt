@@ -62,7 +62,7 @@ def read_gpio(gpio_no=17):
     return gpio_value
 
  
-def write_database (db_file, ip_shelly, polling_interval='60', temp_repetitions=15):
+def write_database (db_file, ip_shelly, polling_interval='60', temp_repetitions='2'):
         try:
                 while True:
 
@@ -136,31 +136,39 @@ def write_database (db_file, ip_shelly, polling_interval='60', temp_repetitions=
                                 # After n repetitions, log additionally temperatures & gpio
                                 counter_repetition =+ 1
 
-                                if counter_repetition == temp_repetitions:
+                                if counter_repetition == int(temp_repetitions):
 
-                                        sensors, temperatures = read_temperatures()
-                                        gpio = read_gpio(17)
-                                        counter_repetition = 0
-                                        print('Temperatures:', temperatures)
-                                        print('GPIO:', gpio)
+                                        # Temperatures
+                                        db_sensors, db_temp = read_temperatures()
+                                        print('Temperatures:', db_temp)                                        
+
+                                        db_temp.insert(0, timestamp)                                        
 
                                         sql = 'CREATE TABLE IF NOT EXISTS temperatures' + \
                                                 ' (timestamp DATETIME,' + \
                                                 ' temp_1 REAL, temp_2 REAL, temp_3 REAL, temp_4 REAL, temp_5 REAL);'
                                         c.execute(sql)
 
+                                        sql = 'INSERT INTO temperatures (timestamp, temp_1, temp_2, temp_3, temp_4, temp_5)' + \
+                                                ' VALUES (?, ?, ?, ?, ?, ?);'
+                                        c.execute(sql, db_temp)
 
+                                        # GPIO
+                                        db_gpio = [read_gpio(17)]
+                                        print('GPIO:', db_gpio)
 
+                                        db_gpio.insert(0, timestamp)
 
                                         sql = 'CREATE TABLE IF NOT EXISTS gpio' + \
                                                 ' (timestamp DATETIME, gpio_value INT);'
                                         c.execute(sql)
 
+                                        sql = 'INSERT INTO gpio (timestamp, gpio_value)' + \
+                                                ' VALUES (?, ?);'
+                                        c.execute(sql, db_gpio)
 
-
-
+                                        # Reset counter
                                         counter_repetition = 0
-
 
                                 # Database
                                 conn.commit()                

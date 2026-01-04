@@ -14,15 +14,14 @@ from python_functions import *
 
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(description="Shelly EM Logger")
-    parser.add_argument("database", help="Path to the SQLite database file")
-    parser.add_argument("ip", help="IP address of the Shelly device")
-    parser.add_argument("interval", help="Polling interval")
+    parser = argparse.ArgumentParser(description='Shelly EM Logger')
+    parser.add_argument('database', help='Path to the SQLite database file')
+    parser.add_argument('ip', help='IP address of the Shelly device')
+    parser.add_argument('interval', help='Polling interval')
+    parser.add_argument('temp_repetitions', help='Number of repetitions before checking temperatures')
     args = parser.parse_args()
 
-    write_database(args.database, args.ip, args.interval)
-
-
+    write_database(args.database, args.ip, args.interval, args.temp_repetitions)
 
 
 
