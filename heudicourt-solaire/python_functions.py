@@ -9,9 +9,64 @@ import requests
 import sqlite3
 import time
 
+import re
+import subprocess
 
-def write_database(db_file, ip_shelly, polling_interval='60'):
+
+def read_temperatures ():
+
+        lst_temp = []
+        r_temp = re.compile('t=([0-9]+)')
+        dct_sensors = {'salon': '28-0000067c14c7',
+                        'cour': '28-0000050b221b',
+                        'grenier': '28-15dccf1964ff',
+                        'cellier': '28-6cb8cf1964ff',
+                        'chaufferie': '28-1806ce1964ff'}
+        bus_path = '/home/francis/sys-bus-w1-devices/'
+
+        address = bus_path + dct_sensors['salon'] + '/w1_slave'
+        stdout = subprocess.run(['cat', address], capture_output=True, text=True).stdout
+
+        for key, value in dct_sensors.items():
+
+                address = '/home/francis/sys-bus-w1-devices/' + value + '/w1_slave'
+                stdout = subprocess.run(['cat', address], capture_output=True, text=True).stdout
+
+                sens_out = r_temp.findall(stdout)
+                if len(sens_out) > 0:
+                        if sens_out[0].isdigit():
+                                lst_temp.append(int(sens_out[0])/1000)
+                        else:
+                                lst_temp.append(None)
+                else:
+                        lst_temp.append(None)
+
+        return dct_sensors, lst_temp
+
+
+def read_gpio(gpio_no=17):
+
+    gpio_value = None
+    r_gpio = re.compile('([0-9])\n')
+    gpio_path = '/home/francis/sys-class-gpio-gpio' + str(gpio_no) + '/'
+
+    address = gpio_path + '/value'
+    stdout = subprocess.run(['cat', address], capture_output=True, text=True).stdout
+    
+    gpio_out = r_gpio.findall(stdout)
+
+    if len(gpio_out) > 0:
+        if gpio_out[0].isdigit():
+                gpio_value = int(gpio_out[0])
+
+    return gpio_value
+
+ 
+def write_database (db_file, ip_shelly, polling_interval='60', temp_repetitions='2'):
         try:
+
+                counter_repetition = 0
+
                 while True:
 
                         try:
@@ -81,6 +136,43 @@ def write_database(db_file, ip_shelly, polling_interval='60'):
                                 ison_int = 1 if relay_ison else 0
                                 c.execute(sql, (timestamp, ison_int))
 
+                                # After n repetitions, log additionally temperatures & gpio
+                                counter_repetition = counter_repetition+1
+
+                                if counter_repetition == int(temp_repetitions):
+
+                                        # Temperatures
+                                        db_sensors, db_temp = read_temperatures()
+                                        print('Temperatures:', db_temp)                                        
+
+                                        db_temp.insert(0, timestamp)                                        
+
+                                        sql = 'CREATE TABLE IF NOT EXISTS temperatures' + \
+                                                ' (timestamp DATETIME,' + \
+                                                ' temp_1 REAL, temp_2 REAL, temp_3 REAL, temp_4 REAL, temp_5 REAL);'
+                                        c.execute(sql)
+
+                                        sql = 'INSERT INTO temperatures (timestamp, temp_1, temp_2, temp_3, temp_4, temp_5)' + \
+                                                ' VALUES (?, ?, ?, ?, ?, ?);'
+                                        c.execute(sql, db_temp)
+
+                                        # GPIO
+                                        db_gpio = [read_gpio(17)]
+                                        print('GPIO:', db_gpio)
+
+                                        db_gpio.insert(0, timestamp)
+
+                                        sql = 'CREATE TABLE IF NOT EXISTS gpio' + \
+                                                ' (timestamp DATETIME, gpio_value INT);'
+                                        c.execute(sql)
+
+                                        sql = 'INSERT INTO gpio (timestamp, gpio_value)' + \
+                                                ' VALUES (?, ?);'
+                                        c.execute(sql, db_gpio)
+
+                                        # Reset counter
+                                        counter_repetition = 0
+
                                 # Database
                                 conn.commit()                
                                 conn.close()
@@ -89,6 +181,7 @@ def write_database(db_file, ip_shelly, polling_interval='60'):
 
                         except requests.exceptions.RequestException as e:
                                 print ('Shelly unreachable:', e)
+                                counter_occurence = 0
 
         except KeyboardInterrupt:
                 print ('Logging interrupted.')
@@ -98,8 +191,7 @@ def write_database(db_file, ip_shelly, polling_interval='60'):
                 conn.close()
 
 
-
-def read_database(db_file):
+def read_database (db_file):
 
         # Database
         conn = sqlite3.connect (db_file)
@@ -125,7 +217,7 @@ def read_database(db_file):
         return rows
 
 
-def plot_logdata(db_file, png_file):
+def plot_logdata (db_file, png_file):
 
         rows = read_database(db_file)
 
@@ -163,7 +255,7 @@ def plot_logdata(db_file, png_file):
         fig.savefig(png_file)
 
 
-def display_logdata(db_file):
+def display_logdata (db_file):
 
         rows = read_database(db_file)
 
