@@ -64,6 +64,9 @@ def read_gpio(gpio_no=17):
  
 def write_database (db_file, ip_shelly, polling_interval='60', temp_repetitions='2'):
         try:
+
+                counter_repetition = 0
+
                 while True:
 
                         try:
@@ -134,7 +137,7 @@ def write_database (db_file, ip_shelly, polling_interval='60', temp_repetitions=
                                 c.execute(sql, (timestamp, ison_int))
 
                                 # After n repetitions, log additionally temperatures & gpio
-                                counter_repetition =+ 1
+                                counter_repetition = counter_repetition+1
 
                                 if counter_repetition == int(temp_repetitions):
 
